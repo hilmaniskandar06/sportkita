@@ -8,7 +8,7 @@ import { useToast } from '../context/ToastContext'
 import { resizeImage } from '../utils/image'
 
 export default function Profile() {
-  const { user, updateProfile, logout, deleteAccount } = useAuth()
+  const { user, loading, updateProfile, logout, deleteAccount } = useAuth()
   const { addToast } = useToast()
   
   const [formData, setFormData] = useState({
@@ -60,6 +60,8 @@ export default function Profile() {
       }
     }
   }, [user])
+
+  if (loading) return null
 
   if (!user) return <Navigate to="/login" replace />
 

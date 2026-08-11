@@ -46,7 +46,7 @@ export default function Checkout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { addToast } = useToast()
-  const { user, updateProfile } = useAuth()
+  const { user, loading, updateProfile } = useAuth()
   const { addNotification } = useNotifications()
   
   const directItem = location.state?.directItem
@@ -88,22 +88,7 @@ export default function Checkout() {
         ...f,
         name: user.name || '',
         phone: user.phone || '',
-        ...(user.address?.provinsiId ? {
-          provinceId: user.address.provinsiId, provinceName: user.address.provinsi,
-          regencyId: user.address.kotaId, regencyName: user.address.kota,
-          districtId: user.address.kecamatanId, districtName: user.address.kecamatan,
-          villageId: user.address.desaId, villageName: user.address.desa,
-          postal: user.address.kodePos || '',
-          addressDetail: user.address.detail || ''
-        } : {})
       }))
-      
-      // Load dropdown options if address exists
-      if (user.address?.provinsiId) {
-        geo.listRegencies(user.address.provinsiId).then(setRegencies)
-        geo.listDistricts(user.address.kotaId).then(setDistricts)
-        geo.listVillages(user.address.kecamatanId).then(setVillages)
-      }
     }
   }, [user])
 
@@ -129,6 +114,8 @@ export default function Checkout() {
     }
     addToast('Alamat berhasil dimuat dari profil');
   }
+
+  if (loading) return null
 
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname, state: location.state }} />
 
