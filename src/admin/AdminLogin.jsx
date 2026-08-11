@@ -7,7 +7,6 @@ import { Loader2 } from 'lucide-react'
 export default function AdminLogin() {
   const { user, loading, login } = useAuth()
   const { content } = useSiteContent()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -20,12 +19,13 @@ export default function AdminLogin() {
     e.preventDefault()
     setError('')
     setSubmitting(true)
-    const result = await login(email, password)
+    // Gunakan email bawaan secara otomatis di belakang layar
+    const result = await login('admin@sportkita.com', password)
     setSubmitting(false)
     if (result.success) {
       navigate('/admin')
     } else {
-      setError(result.error || 'Login gagal. Periksa email & password.')
+      setError(result.error || 'Login gagal. Periksa password.')
     }
   }
 
@@ -42,22 +42,12 @@ export default function AdminLogin() {
         <h1 className="text-xl font-extrabold mb-1">Masuk Admin</h1>
         <p className="text-sm text-slate-600 mb-6">Kelola toko {content.shopName || 'Sportkita'}.</p>
 
-        <label className="block text-xs font-medium text-slate-600 mb-1.5">Email</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoFocus
-          required
-          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-lime-500 mb-4"
-          placeholder="admin@email.com"
-        />
-
-        <label className="block text-xs font-medium text-slate-600 mb-1.5">Password</label>
+        <label className="block text-xs font-medium text-slate-600 mb-1.5">Password Admin</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoFocus
           required
           className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm outline-none focus:border-lime-500"
         />
