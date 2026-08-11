@@ -61,6 +61,7 @@ export default function Checkout() {
   const [voucherCode, setVoucherCode] = useState('')
   const [activeVoucher, setActiveVoucher] = useState(null)
   const [showQR, setShowQR] = useState(null)
+  const [useSavedAddress, setUseSavedAddress] = useState(false)
 
   const [provinces, setProvinces] = useState([])
   const [regencies, setRegencies] = useState([])
@@ -92,27 +93,42 @@ export default function Checkout() {
     }
   }, [user])
 
-  function handleUseProfileAddress() {
-    if (!user || !user.address) return;
-    setForm(f => ({
-      ...f,
-      name: user.name || f.name,
-      phone: user.phone || f.phone,
-      ...(user.address?.provinsiId ? {
-        provinceId: user.address.provinsiId, provinceName: user.address.provinsi,
-        regencyId: user.address.kotaId, regencyName: user.address.kota,
-        districtId: user.address.kecamatanId, districtName: user.address.kecamatan,
-        villageId: user.address.desaId, villageName: user.address.desa,
-        postal: user.address.kodePos || '',
-        addressDetail: user.address.detail || ''
-      } : {})
-    }));
-    if (user.address?.provinsiId) {
-      geo.listRegencies(user.address.provinsiId).then(setRegencies)
-      geo.listDistricts(user.address.kotaId).then(setDistricts)
-      geo.listVillages(user.address.kecamatanId).then(setVillages)
+  function handleToggleSavedAddress(e) {
+    const checked = e.target.checked;
+    setUseSavedAddress(checked);
+    if (checked) {
+      if (!user || !user.address) return;
+      setForm(f => ({
+        ...f,
+        ...(user.address?.provinsiId ? {
+          provinceId: user.address.provinsiId, provinceName: user.address.provinsi,
+          regencyId: user.address.kotaId, regencyName: user.address.kota,
+          districtId: user.address.kecamatanId, districtName: user.address.kecamatan,
+          villageId: user.address.desaId, villageName: user.address.desa,
+          postal: user.address.kodePos || '',
+          addressDetail: user.address.detail || ''
+        } : {})
+      }));
+      if (user.address?.provinsiId) {
+        geo.listRegencies(user.address.provinsiId).then(setRegencies)
+        geo.listDistricts(user.address.kotaId).then(setDistricts)
+        geo.listVillages(user.address.kecamatanId).then(setVillages)
+      }
+      addToast('Alamat berhasil dimuat dari profil');
+    } else {
+      setForm(f => ({
+        ...f,
+        provinceId: '', provinceName: '',
+        regencyId: '', regencyName: '',
+        districtId: '', districtName: '',
+        villageId: '', villageName: '',
+        postal: '',
+        addressDetail: ''
+      }));
+      setRegencies([]);
+      setDistricts([]);
+      setVillages([]);
     }
-    addToast('Alamat berhasil dimuat dari profil');
   }
 
   if (loading) return null
@@ -313,13 +329,15 @@ export default function Checkout() {
                 <p className="text-xs text-slate-500">Pastikan alamat dan kontak Anda sudah benar.</p>
               </div>
               {user && user.address && user.address.provinsiId && (
-                <button 
-                  type="button"
-                  onClick={handleUseProfileAddress}
-                  className="text-[11px] font-bold bg-lime-500/10 text-lime-700 px-3 py-1.5 rounded-lg hover:bg-lime-500/20 transition-colors"
-                >
-                  Gunakan Alamat Tersimpan
-                </button>
+                <label className="flex items-center gap-2 cursor-pointer bg-lime-50 px-3 py-1.5 rounded-lg border border-lime-200">
+                  <input 
+                    type="checkbox" 
+                    checked={useSavedAddress}
+                    onChange={handleToggleSavedAddress}
+                    className="accent-lime-500 w-3.5 h-3.5 rounded cursor-pointer"
+                  />
+                  <span className="text-[11px] font-bold text-lime-700">Gunakan Alamat Tersimpan</span>
+                </label>
               )}
             </div>
 

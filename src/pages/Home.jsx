@@ -119,7 +119,7 @@ export default function Home() {
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-slate-900 text-white min-h-[72vh] flex items-center">
+      <section className="relative overflow-hidden bg-slate-900 text-white min-h-[100dvh] flex items-center">
         {content.heroMedia && (
           <div className="absolute inset-0 z-0">
             {content.heroMediaType === 'video' ? (
@@ -132,24 +132,11 @@ export default function Home() {
         {/* Gradient overlay */}
         <div className="absolute inset-0 z-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent" />
 
-        {/* Decorative glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-lime-500/10 rounded-full blur-[120px] pointer-events-none z-0" />
-
         <div className="relative z-10 w-full max-w-4xl mx-auto px-5 lg:px-8 pt-20 pb-16 text-center">
           <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05] text-white mb-6 tracking-tight">
             {content.heroTitle}
           </h1>
         </div>
-
-        {/* Scroll-down indicator */}
-        <a
-          href="#katalog"
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 text-white/40 hover:text-lime-400 transition-colors group"
-          aria-label="Gulir ke katalog"
-        >
-          <span className="text-[10px] uppercase tracking-widest font-semibold">Scroll</span>
-          <ChevronDown size={20} className="animate-bounce" />
-        </a>
       </section>
 
       {/* ── Brand Logo Ticker ── */}
