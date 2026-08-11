@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { AlertTriangle, QrCode } from 'lucide-react'
 import ProductThumb from '../components/ProductThumb'
@@ -46,7 +46,7 @@ export default function Checkout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { addToast } = useToast()
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const { addNotification } = useNotifications()
   
   const directItem = location.state?.directItem
@@ -106,6 +106,29 @@ export default function Checkout() {
       }
     }
   }, [user])
+
+  function handleUseProfileAddress() {
+    if (!user || !user.address) return;
+    setForm(f => ({
+      ...f,
+      name: user.name || f.name,
+      phone: user.phone || f.phone,
+      ...(user.address?.provinsiId ? {
+        provinceId: user.address.provinsiId, provinceName: user.address.provinsi,
+        regencyId: user.address.kotaId, regencyName: user.address.kota,
+        districtId: user.address.kecamatanId, districtName: user.address.kecamatan,
+        villageId: user.address.desaId, villageName: user.address.desa,
+        postal: user.address.kodePos || '',
+        addressDetail: user.address.detail || ''
+      } : {})
+    }));
+    if (user.address?.provinsiId) {
+      geo.listRegencies(user.address.provinsiId).then(setRegencies)
+      geo.listDistricts(user.address.kotaId).then(setDistricts)
+      geo.listVillages(user.address.kecamatanId).then(setVillages)
+    }
+    addToast('Alamat berhasil dimuat dari profil');
+  }
 
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname, state: location.state }} />
 
@@ -269,21 +292,18 @@ export default function Checkout() {
       console.warn('Gagal kirim notifikasi admin pesanan baru:', e)
     }
 
-    if (user && form.saveToProfile) {
-      const savedUsers = JSON.parse(localStorage.getItem('kk_users') || '[]')
-      const userIndex = savedUsers.findIndex(u => u.id === user.id)
-      if (userIndex !== -1) {
-        const updatedAddress = {
-          provinsiId: form.provinceId, provinsi: form.provinceName,
-          kotaId: form.regencyId, kota: form.regencyName,
-          kecamatanId: form.districtId, kecamatan: form.districtName,
-          desaId: form.villageId, desa: form.villageName,
-          kodePos: form.postal, detail: form.addressDetail
-        }
-        savedUsers[userIndex].address = updatedAddress
-        localStorage.setItem('kk_users', JSON.stringify(savedUsers))
-        const sessionUser = { ...user, address: updatedAddress }
-        sessionStorage.setItem('kk_auth_session', JSON.stringify(sessionUser))
+    if (user && form.saveToProfile && updateProfile) {
+      const updatedAddress = {
+        provinsiId: form.provinceId, provinsi: form.provinceName,
+        kotaId: form.regencyId, kota: form.regencyName,
+        kecamatanId: form.districtId, kecamatan: form.districtName,
+        desaId: form.villageId, desa: form.villageName,
+        kodePos: form.postal, detail: form.addressDetail
+      }
+      try {
+        await updateProfile({ address: updatedAddress, phone: form.phone, name: form.name })
+      } catch (e) {
+        console.warn('Gagal menyimpan ke profil:', e)
       }
     }
 
@@ -300,8 +320,21 @@ export default function Checkout() {
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-[1fr_360px] gap-10">
         <div className="flex flex-col gap-6">
           <div className="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 className="font-bold mb-1">Informasi Pengiriman</h3>
-            <p className="text-xs text-slate-500 mb-4">Pastikan alamat dan kontak Anda sudah benar.</p>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-bold mb-1">Informasi Pengiriman</h3>
+                <p className="text-xs text-slate-500">Pastikan alamat dan kontak Anda sudah benar.</p>
+              </div>
+              {user && user.address && user.address.provinsiId && (
+                <button 
+                  type="button"
+                  onClick={handleUseProfileAddress}
+                  className="text-[11px] font-bold bg-lime-500/10 text-lime-700 px-3 py-1.5 rounded-lg hover:bg-lime-500/20 transition-colors"
+                >
+                  Gunakan Alamat Tersimpan
+                </button>
+              )}
+            </div>
 
             <div className="grid sm:grid-cols-2 gap-4 mb-5">
               <Field label="Nama Penerima" value={form.name} onChange={(v) => update('name', v)} required />
