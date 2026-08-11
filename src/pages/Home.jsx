@@ -72,11 +72,10 @@ function DropdownFilter({ label, children, active }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
-          active
-            ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-lg shadow-lime-500/20'
-            : 'bg-white border-gray-200 text-slate-700 hover:border-slate-400'
-        }`}
+        className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-semibold transition-all ${active
+          ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-lg shadow-lime-500/20'
+          : 'bg-white border-gray-200 text-slate-700 hover:border-slate-400'
+          }`}
       >
         {label}
         <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
@@ -119,7 +118,7 @@ export default function Home() {
   return (
     <div>
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-slate-900 text-white min-h-[100dvh] flex items-center">
+      <section className="relative overflow-hidden bg-slate-900 text-white min-h-[83dvh] flex items-center">
         {content.heroMedia && (
           <div className="absolute inset-0 z-0">
             {content.heroMediaType === 'video' ? (
@@ -160,11 +159,10 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setActiveCategory('')}
-            className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
-              !activeCategory
-                ? 'bg-slate-900 text-white border-slate-900'
-                : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
-            }`}
+            className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${!activeCategory
+              ? 'bg-slate-900 text-white border-slate-900'
+              : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
+              }`}
           >
             Semua
           </button>
@@ -173,11 +171,10 @@ export default function Home() {
               key={c.id}
               type="button"
               onClick={() => setActiveCategory(activeCategory === c.name ? '' : c.name)}
-              className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
-                activeCategory === c.name
-                  ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-md shadow-lime-500/20'
-                  : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
-              }`}
+              className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${activeCategory === c.name
+                ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-md shadow-lime-500/20'
+                : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
+                }`}
             >
               {c.name}
             </button>
@@ -193,9 +190,8 @@ export default function Home() {
                 key={s.value}
                 type="button"
                 onClick={() => setSort(s.value)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                  sort === s.value ? 'bg-lime-100 text-slate-900' : 'text-slate-600 hover:bg-gray-50'
-                }`}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm font-semibold transition-colors ${sort === s.value ? 'bg-lime-100 text-slate-900' : 'text-slate-600 hover:bg-gray-50'
+                  }`}
               >
                 {s.label}
               </button>
@@ -234,11 +230,10 @@ export default function Home() {
           <button
             type="button"
             onClick={() => setInStockOnly((v) => !v)}
-            className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${
-              stockActive
-                ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-md shadow-lime-500/20'
-                : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
-            }`}
+            className={`px-4 py-2 rounded-full border text-sm font-semibold transition-all ${stockActive
+              ? 'bg-lime-500 text-slate-900 border-lime-500 shadow-md shadow-lime-500/20'
+              : 'bg-white border-gray-200 text-slate-600 hover:border-slate-400'
+              }`}
           >
             {stockActive ? '✓ ' : ''}Tersedia
           </button>
