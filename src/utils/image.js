@@ -1,4 +1,4 @@
-﻿// Mengubah file gambar menjadi dataURL base64 yang sudah dikompres.
+// Mengubah file gambar menjadi dataURL base64 yang sudah dikompres.
 // Format output menyesuaikan file asli: PNG/WebP -> PNG (agar transparansi tetap).
 // JPG/JPEG/GIF -> JPEG (hemat size, tapi tanpa transparansi).
 export function resizeImage(file, maxWidth = 640, quality = 0.8) {
@@ -31,4 +31,35 @@ export function resizeImage(file, maxWidth = 640, quality = 0.8) {
     }
     reader.readAsDataURL(file)
   })
+}
+
+export function parseImage(img) {
+  if (!img) return { url: '', color: '' }
+  if (typeof img === 'object') {
+    return { url: img.url || '', color: img.color || '' }
+  }
+  if (typeof img === 'string') {
+    if (img.startsWith('{') && img.includes('"url"')) {
+      try {
+        const parsed = JSON.parse(img)
+        return { url: parsed.url || '', color: parsed.color || '' }
+      } catch {}
+    }
+    const idx = img.indexOf('#color=')
+    if (idx !== -1) {
+      return {
+        url: img.slice(0, idx),
+        color: decodeURIComponent(img.slice(idx + 7))
+      }
+    }
+    return { url: img, color: '' }
+  }
+  return { url: String(img), color: '' }
+}
+
+export function formatImage(url, color) {
+  if (!url) return ''
+  const cleanUrl = url.split('#color=')[0]
+  if (!color) return cleanUrl
+  return `${cleanUrl}#color=${encodeURIComponent(color)}`
 }

@@ -1,11 +1,15 @@
-﻿import { supabase } from '../config/supabase'
+import { supabase } from '../config/supabase'
 
 export async function uploadImage(dataUrl, path, bucketName = 'public') {
-  // Convert Data URL to Blob
-  const res = await fetch(dataUrl)
-  const blob = await res.blob()
-
-  return uploadFile(blob, path, bucketName)
+  try {
+    // Convert Data URL to Blob
+    const res = await fetch(dataUrl)
+    const blob = await res.blob()
+    return await uploadFile(blob, path, bucketName)
+  } catch (err) {
+    console.warn('Gagal upload ke Supabase Storage, menggunakan format data lokal:', err.message)
+    return dataUrl
+  }
 }
 
 export async function uploadFile(fileOrBlob, path, bucketName = 'public') {

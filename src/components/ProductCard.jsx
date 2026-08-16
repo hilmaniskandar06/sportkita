@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useToast } from '../context/ToastContext'
 import { useAuth } from '../context/AuthContext'
+import { parseImage } from '../utils/image'
 
 const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
@@ -81,7 +82,7 @@ export default function ProductCard({ product }) {
           <Heart size={15} className={wishlisted ? 'fill-rose-500 text-rose-500' : 'text-slate-600'} />
         </button>
         <img 
-          src={product?.images?.[0] || product?.image || 'https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400'} 
+          src={parseImage(product?.images?.[0] || product?.image).url || 'https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400'} 
           alt={product.name} 
           className="w-full h-full object-cover"
         />

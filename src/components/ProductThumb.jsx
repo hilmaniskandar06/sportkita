@@ -1,5 +1,8 @@
-﻿export default function ProductThumb({ product, size = 64, className = '' }) {
-  const imgUrl = product?.images?.[0] || product?.image
+import { parseImage } from '../utils/image'
+
+export default function ProductThumb({ product, size = 64, className = '' }) {
+  const first = product?.images?.[0] || product?.image
+  const imgUrl = parseImage(first).url
   if (imgUrl) {
     return (
       <img

@@ -13,12 +13,14 @@ function mapFromDb(dbItem) {
     longDesc: dbItem.description,
     externalLink: dbItem.external_link || null,
     sportType: dbItem.sport_type,
-    sold: Number(dbItem.sold || 0)
+    sold: Number(dbItem.sold || 0),
+    brand: dbItem.brand || '',
+    colors: dbItem.colors || '',
   }
 }
 
-function mapToDb(item) {
-  return {
+function mapToDb(item, excludeBrandColor = false) {
+  const data = {
     id: item.id,
     name: item.name,
     price: item.price,
@@ -38,6 +40,11 @@ function mapToDb(item) {
     material: item.material || null,
     sold: Number(item.sold || 0)
   }
+  if (!excludeBrandColor) {
+    if (item.brand !== undefined) data.brand = item.brand || null
+    if (item.colors !== undefined) data.colors = item.colors || null
+  }
+  return data
 }
 
 export async function incrementProductsSold(itemsWithQty) {
@@ -93,15 +100,33 @@ export async function getProduct(id) {
 
 export async function createProduct(payload) {
   const id = payload.id || 'p' + Date.now()
-  const dbData = mapToDb({ ...payload, id })
-  const { data, error } = await supabase.from('products').insert(dbData).select().single()
+  let dbData = mapToDb({ ...payload, id })
+  let { data, error } = await supabase.from('products').insert(dbData).select().single()
+  
+  if (error && (error.message?.includes('brand') || error.message?.includes('colors') || error.message?.includes('schema cache'))) {
+    console.warn('Kolom brand/colors belum ada di database products, menyimpan tanpa kolom tersebut:', error.message)
+    dbData = mapToDb({ ...payload, id }, true)
+    const retry = await supabase.from('products').insert(dbData).select().single()
+    data = retry.data
+    error = retry.error
+  }
+
   if (error) throw new Error(error.message)
   return mapFromDb(data)
 }
 
 export async function updateProduct(id, payload) {
-  const dbData = mapToDb({ ...payload, id })
-  const { data, error } = await supabase.from('products').update(dbData).eq('id', id).select().single()
+  let dbData = mapToDb({ ...payload, id })
+  let { data, error } = await supabase.from('products').update(dbData).eq('id', id).select().single()
+
+  if (error && (error.message?.includes('brand') || error.message?.includes('colors') || error.message?.includes('schema cache'))) {
+    console.warn('Kolom brand/colors belum ada di database products, menyimpan tanpa kolom tersebut:', error.message)
+    dbData = mapToDb({ ...payload, id }, true)
+    const retry = await supabase.from('products').update(dbData).eq('id', id).select().single()
+    data = retry.data
+    error = retry.error
+  }
+
   if (error) throw new Error(error.message)
   return mapFromDb(data)
 }

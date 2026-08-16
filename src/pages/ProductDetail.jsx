@@ -4,10 +4,13 @@ import { Minus, Plus, Heart, Truck, ShieldCheck, Zap, ChevronLeft, ChevronRight 
 import ProductThumb from '../components/ProductThumb'
 import ProductCard from '../components/ProductCard'
 import { useProducts } from '../context/ProductsContext'
+import { useColors } from '../context/ColorsContext'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useToast } from '../context/ToastContext'
 import { useAuth } from '../context/AuthContext'
+import { parseImage } from '../utils/image'
+import { getColorStyle } from '../services/colorService'
 
 const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
@@ -20,11 +23,17 @@ export default function ProductDetail() {
   const [imgIdx, setImgIdx] = useState(0)
   const sizeOptions = product?.size ? product.size.split(',').map((s) => s.trim()).filter(Boolean) : []
   const [selectedSize, setSelectedSize] = useState(sizeOptions[0] || '')
+  
+  const colorOptions = product?.colors ? product.colors.split(',').map((c) => c.trim()).filter(Boolean) : []
+  const [selectedColor, setSelectedColor] = useState(colorOptions[0] || '')
+
   const { addItem } = useCart()
   const { toggle, isWishlisted } = useWishlist()
   const { addToast } = useToast()
   const { user } = useAuth()
   const navigate = useNavigate()
+
+  const { colors } = useColors()
 
   const featured = useMemo(() => {
     return [...products].sort(() => 0.5 - Math.random()).slice(0, 4)
@@ -45,16 +54,35 @@ export default function ProductDetail() {
     addToast(`${qty}x ${product.name} ditambahkan ke keranjang`)
   }
 
-  // Handle images
-  const images = product.images?.length > 0 ? product.images : (product.image ? [product.image] : [])
+  // Handle images with colors
+  const rawImages = product.images?.length > 0 ? product.images : (product.image ? [product.image] : [])
+  const images = rawImages.map(parseImage)
+
   const nextImg = () => setImgIdx((i) => (i + 1) % images.length)
   const prevImg = () => setImgIdx((i) => (i - 1 + images.length) % images.length)
+
+  function handleSelectColor(clr) {
+    setSelectedColor(clr)
+    // Cari foto yang memiliki tag warna ini
+    const targetIdx = images.findIndex((img) => img.color && img.color.toLowerCase() === clr.toLowerCase())
+    if (targetIdx !== -1) {
+      setImgIdx(targetIdx)
+    }
+  }
+
+  function handleSelectImage(idx) {
+    setImgIdx(idx)
+    // Jika foto yang diklik punya warna, otomatis pilih warna tersebut
+    if (images[idx]?.color && colorOptions.includes(images[idx].color)) {
+      setSelectedColor(images[idx].color)
+    }
+  }
 
   function handleBuyNow(e) {
     if (e && e.preventDefault) e.preventDefault()
     if (!product.inStock) return
     if (!user) return addToast('Silakan login terlebih dahulu', 'error')
-    navigate('/checkout', { state: { directItem: { ...product, qty } } })
+    navigate('/checkout', { state: { directItem: { ...product, qty, selectedSize, selectedColor } } })
   }
 
   return (
@@ -68,10 +96,16 @@ export default function ProductDetail() {
       <div className="grid lg:grid-cols-2 gap-12">
         <div>
           <div className="relative bg-gray-100 rounded-2xl aspect-square flex items-center justify-center overflow-hidden border border-gray-200">
-            {images.length > 0 ? (
-              <img src={images[imgIdx]} alt={product.name} className="w-full h-full object-cover" />
+            {images.length > 0 && images[imgIdx]?.url ? (
+              <img src={images[imgIdx].url} alt={product.name} className="w-full h-full object-cover transition-all duration-300" />
             ) : (
               <div className="text-slate-500">Tidak ada gambar</div>
+            )}
+
+            {images[imgIdx]?.color && (
+              <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+                Warna: {images[imgIdx].color}
+              </div>
             )}
             
             {images.length > 1 && (
@@ -86,7 +120,7 @@ export default function ProductDetail() {
                   {images.map((_, idx) => (
                     <button 
                       key={idx} 
-                      onClick={() => setImgIdx(idx)}
+                      onClick={() => handleSelectImage(idx)}
                       className={`w-2.5 h-2.5 rounded-full transition-colors ${idx === imgIdx ? 'bg-lime-500 w-6' : 'bg-white/60 hover:bg-white'}`}
                     />
                   ))}
@@ -100,10 +134,17 @@ export default function ProductDetail() {
               {images.map((img, idx) => (
                 <button 
                   key={idx} 
-                  onClick={() => setImgIdx(idx)}
-                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-colors ${idx === imgIdx ? 'border-lime-500' : 'border-transparent opacity-70 hover:opacity-100'}`}
+                  onClick={() => handleSelectImage(idx)}
+                  className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
+                    idx === imgIdx ? 'border-lime-500 ring-2 ring-lime-500/30' : 'border-transparent opacity-70 hover:opacity-100'
+                  }`}
                 >
-                  <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
+                  <img src={img.url} alt="thumbnail" className="w-full h-full object-cover" />
+                  {img.color && (
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[8px] font-bold text-center py-0.5 truncate px-1">
+                      {img.color}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -133,6 +174,9 @@ export default function ProductDetail() {
             )}
             {product.gender && product.gender !== 'unisex' && (
               <span className="text-slate-600 border-r border-gray-200 pr-4">Untuk: <strong className="text-slate-900 capitalize">{product.gender}</strong></span>
+            )}
+            {product.brand && (
+              <span className="text-slate-600 border-r border-gray-200 pr-4">Brand: <strong className="text-slate-900 capitalize">{product.brand}</strong></span>
             )}
             {product.sportType && (
               <span className="text-slate-600 border-r border-gray-200 pr-4">Olahraga: <strong className="text-slate-900 capitalize">{product.sportType}</strong></span>
@@ -166,6 +210,37 @@ export default function ProductDetail() {
                     {sz}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {colorOptions.length > 0 && (
+            <div className="mt-6">
+              <div className="text-xs font-semibold text-slate-600 mb-2.5">Pilih Warna{selectedColor && `: ${selectedColor}`}</div>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map((clr) => {
+                  const colorObj = colors?.find(c => c.name.toLowerCase() === clr.toLowerCase())
+                  return (
+                    <button
+                      key={clr}
+                      type="button"
+                      onClick={() => handleSelectColor(clr)}
+                      className={`h-10 px-4 rounded-lg font-bold text-sm transition-colors flex items-center gap-2 ${
+                        selectedColor === clr
+                          ? 'bg-slate-900 text-white ring-2 ring-lime-500 ring-offset-1'
+                          : 'bg-gray-100 text-slate-800 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      {colorObj && (
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0 inline-block shadow-xs"
+                          style={getColorStyle(colorObj)}
+                        />
+                      )}
+                      {clr}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}

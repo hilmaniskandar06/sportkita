@@ -240,11 +240,17 @@ export default function Checkout() {
       id: 'KK-' + Math.floor(100000 + Math.random() * 899999),
       userId: user ? user.id : null,
       date: new Date().toISOString(),
-      items: checkoutItems.map((i) => ({
-        id: i.id, name: i.name, price: i.price, qty: i.qty, shape: i.shape, tone: i.tone,
-        image: i.image || (i.images && i.images[0]) || null,
-        images: i.images || (i.image ? [i.image] : []),
-      })),
+      items: checkoutItems.map((i) => {
+        const rawFirst = i.image || (i.images && i.images[0]) || null
+        const cleanUrl = rawFirst ? (typeof rawFirst === 'object' ? rawFirst.url : rawFirst.split('#color=')[0]) : null
+        return {
+          id: i.id, name: i.name, price: i.price, qty: i.qty, shape: i.shape, tone: i.tone,
+          size: i.selectedSize || i.size,
+          color: i.selectedColor || i.colors,
+          image: cleanUrl,
+          images: i.images || (cleanUrl ? [cleanUrl] : []),
+        }
+      }),
       subtotal: checkoutSubtotal,
       discount,
       voucherCode: activeVoucher ? activeVoucher.voucher.code : null,
@@ -474,7 +480,11 @@ export default function Checkout() {
                 </div>
                 <div className="flex-1 min-w-0 text-xs">
                   <div className="font-semibold truncate">{i.name}</div>
-                  <div className="text-slate-500">Qty {i.qty}</div>
+                  <div className="text-slate-500">
+                    Qty {i.qty}
+                    {i.selectedSize && ` • Ukuran: ${i.selectedSize}`}
+                    {i.selectedColor && ` • Warna: ${i.selectedColor}`}
+                  </div>
                 </div>
                 <span className="font-mono text-xs font-semibold">{fmt(i.price * i.qty)}</span>
               </div>

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { LogOut, Store, Package, Tag, FileText, Ticket, CreditCard, ShoppingBag, Users, Bell, MessageCircle, FileDown, LayoutTemplate } from 'lucide-react'
+import { LogOut, Store, Package, Tag, FileText, Ticket, CreditCard, ShoppingBag, Users, Bell, MessageCircle, FileDown, LayoutTemplate, Award, Palette } from 'lucide-react'
 import { useSiteContent } from '../context/SiteContentContext'
 import { useAuth } from '../context/AuthContext'
 import { useChat } from '../context/ChatContext'
@@ -49,6 +49,8 @@ export default function AdminShell({ title, actions, children }) {
     { name: 'Chat', path: '/admin/chat', icon: MessageCircle, badge: unreadChats },
     { name: 'Produk', path: '/admin', icon: Package, exact: true },
     { name: 'Kategori', path: '/admin/kategori', icon: Tag },
+    { name: 'Brand', path: '/admin/brand', icon: Award },
+    { name: 'Warna', path: '/admin/warna', icon: Palette },
     { name: 'Konten Situs', path: '/admin/konten', icon: FileText },
     { name: 'Halaman Statis', path: '/admin/halaman', icon: LayoutTemplate },
     { name: 'Voucher', path: '/admin/voucher', icon: Ticket },
