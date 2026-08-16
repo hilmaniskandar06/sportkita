@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import CartDrawer from './components/CartDrawer'
@@ -90,7 +90,7 @@ export default function App() {
       <main className="flex-1 pb-10 md:pb-0">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
-          <Route path="/toko" element={<Shop />} />
+          <Route path="/toko" element={<Navigate to="/" replace />} />
           <Route path="/produk/:id" element={<ProductDetail />} />
           <Route path="/keranjang" element={<CartPage />} />
           <Route path="/checkout" element={<Checkout />} />

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
-import { Minus, Plus, Heart, Truck, ShieldCheck, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useParams, Link, Navigate } from 'react-router-dom'
+import { Minus, Plus, Heart, Truck, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductThumb from '../components/ProductThumb'
 import ProductCard from '../components/ProductCard'
 import { useProducts } from '../context/ProductsContext'
@@ -31,7 +31,6 @@ export default function ProductDetail() {
   const { toggle, isWishlisted } = useWishlist()
   const { addToast } = useToast()
   const { user } = useAuth()
-  const navigate = useNavigate()
 
   const { colors } = useColors()
 
@@ -50,8 +49,9 @@ export default function ProductDetail() {
     if (e && e.preventDefault) e.preventDefault()
     if (!product.inStock) return
     if (!user) return addToast('Silakan login terlebih dahulu', 'error')
-    addItem(product.id, qty)
-    addToast(`${qty}x ${product.name} ditambahkan ke keranjang`)
+    addItem(product.id, qty, { selectedSize, selectedColor })
+    const details = [selectedSize ? `Size ${selectedSize}` : '', selectedColor ? selectedColor : ''].filter(Boolean).join(', ')
+    addToast(`${qty}x ${product.name} ${details ? `(${details})` : ''} ditambahkan ke keranjang`)
   }
 
   // Handle images with colors
@@ -76,13 +76,6 @@ export default function ProductDetail() {
     if (images[idx]?.color && colorOptions.includes(images[idx].color)) {
       setSelectedColor(images[idx].color)
     }
-  }
-
-  function handleBuyNow(e) {
-    if (e && e.preventDefault) e.preventDefault()
-    if (!product.inStock) return
-    if (!user) return addToast('Silakan login terlebih dahulu', 'error')
-    navigate('/checkout', { state: { directItem: { ...product, qty, selectedSize, selectedColor } } })
   }
 
   return (
@@ -270,20 +263,13 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          <div className="flex gap-3 mt-3">
+          <div className="mt-4">
             <button
               onClick={handleAdd}
               disabled={!product.inStock}
-              className="flex-1 bg-white border-2 border-slate-900 text-slate-900 font-bold py-3 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-md text-sm md:text-base"
             >
-              Tambah ke Keranjang
-            </button>
-            <button
-              onClick={handleBuyNow}
-              disabled={!product.inStock}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-slate-900 text-white font-bold py-3 rounded-full hover:bg-slate-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {product.inStock ? 'Beli Sekarang' : 'Stok Habis'}
+              {product.inStock ? 'Tambah ke Keranjang' : 'Stok Habis'}
             </button>
           </div>
 

@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, Heart, ShoppingBag, User as UserIcon, Bell, Download } from 'lucide-react'
 import { useCart } from '../context/CartContext'
@@ -38,7 +38,8 @@ export default function Header({ onOpenCart }) {
 
   function handleSearch(e) {
     e.preventDefault()
-    navigate(`/toko?q=${encodeURIComponent(query)}`)
+    navigate(`/?q=${encodeURIComponent(query)}#katalog`)
+    setSearchOpen(false)
   }
 
   return (

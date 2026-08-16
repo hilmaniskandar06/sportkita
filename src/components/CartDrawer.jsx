@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react'
 import ProductThumb from './ProductThumb'
 import { useCart } from '../context/CartContext'
@@ -41,24 +41,41 @@ export default function CartDrawer({ open, onClose }) {
             </div>
           ) : (
             cartList.map((item) => (
-              <div key={item.id} className="flex gap-3 py-4 border-b border-gray-100">
+              <div key={item.cartKey || item.id} className="flex gap-3 py-4 border-b border-gray-100">
                 <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <ProductThumb product={item} size={36} />
+                  <ProductThumb product={item} size={42} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-semibold text-slate-900 truncate">{item.name}</h4>
-                  <span className="font-mono text-xs text-slate-700">{fmt(item.price)}</span>
+                  
+                  {/* Size & Color Tags */}
+                  {(item.selectedSize || item.selectedColor) && (
+                    <div className="flex flex-wrap gap-1 mt-0.5 mb-1">
+                      {item.selectedSize && (
+                        <span className="text-[10px] bg-gray-100 text-slate-700 font-bold px-1.5 py-0.5 rounded">
+                          Size {item.selectedSize}
+                        </span>
+                      )}
+                      {item.selectedColor && (
+                        <span className="text-[10px] bg-gray-100 text-slate-700 font-bold px-1.5 py-0.5 rounded">
+                          {item.selectedColor}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  <span className="font-mono text-xs text-slate-700 font-bold">{fmt(item.price)}</span>
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center border border-gray-200 rounded-full">
-                      <button onClick={() => setQty(item.id, item.qty - 1)} className="w-7 h-7 flex items-center justify-center" aria-label="Kurangi">
+                      <button onClick={() => setQty(item.cartKey || item.id, item.qty - 1)} className="w-7 h-7 flex items-center justify-center" aria-label="Kurangi">
                         <Minus size={12} />
                       </button>
-                      <span className="w-6 text-center text-xs font-mono">{item.qty}</span>
-                      <button onClick={() => setQty(item.id, item.qty + 1)} className="w-7 h-7 flex items-center justify-center" aria-label="Tambah">
+                      <span className="w-6 text-center text-xs font-mono font-bold">{item.qty}</span>
+                      <button onClick={() => setQty(item.cartKey || item.id, item.qty + 1)} className="w-7 h-7 flex items-center justify-center" aria-label="Tambah">
                         <Plus size={12} />
                       </button>
                     </div>
-                    <button onClick={() => removeItem(item.id)} className="text-xs text-rose-500 hover:underline">
+                    <button onClick={() => removeItem(item.cartKey || item.id)} className="text-xs text-rose-500 font-semibold hover:underline">
                       Hapus
                     </button>
                   </div>

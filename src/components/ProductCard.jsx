@@ -1,5 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { Heart, Plus, Zap } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Heart, Plus } from 'lucide-react'
 import ProductThumb from './ProductThumb'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -14,7 +14,6 @@ export default function ProductCard({ product }) {
   const { addItem } = useCart()
   const { addToast } = useToast()
   const { user } = useAuth()
-  const navigate = useNavigate()
   const wishlisted = isWishlisted(product.id)
 
   const discount = product.oldPrice
@@ -28,14 +27,6 @@ export default function ProductCard({ product }) {
     if (!user) return addToast('Silakan login terlebih dahulu', 'error')
     addItem(product.id, 1)
     addToast(`${product.name} ditambahkan ke keranjang`)
-  }
-
-  function handleBuyNow(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    if (!product.inStock) return
-    if (!user) return addToast('Silakan login terlebih dahulu', 'error')
-    navigate('/checkout', { state: { directItem: { ...product, qty: 1 } } })
   }
 
   function handleWishlist(e) {
@@ -124,18 +115,9 @@ export default function ProductCard({ product }) {
               disabled={!product.inStock}
               aria-label="Tambah ke keranjang"
               title="Tambah ke Keranjang"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border border-gray-200 text-slate-800 flex items-center justify-center hover:border-lime-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-lime-500 text-slate-950 flex items-center justify-center hover:bg-lime-400 font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-xs"
             >
-              <Plus size={16} />
-            </button>
-            <button
-              onClick={handleBuyNow}
-              disabled={!product.inStock}
-              aria-label="Beli sekarang"
-              title="Beli Sekarang"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-800 text-white flex items-center justify-center hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <Zap size={14} className="fill-current" />
+              <Plus size={18} strokeWidth={2.5} />
             </button>
           </div>
         </div>

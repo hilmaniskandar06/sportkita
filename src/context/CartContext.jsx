@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { useProducts } from './ProductsContext'
 import { useAuth } from './AuthContext'
 import { supabase } from '../config/supabase'
@@ -49,21 +49,45 @@ export function CartProvider({ children }) {
     }
   }, [items, user])
 
-  function addItem(id, qty = 1) {
-    setItems((prev) => ({ ...prev, [id]: (prev[id] || 0) + qty }))
+  function addItem(id, qty = 1, options = {}) {
+    const size = options.selectedSize || options.size || ''
+    const color = options.selectedColor || options.color || ''
+    const key = `${id}${size ? `__size_${size}` : ''}${color ? `__color_${color}` : ''}`
+
+    setItems((prev) => {
+      const existing = prev[key]
+      const existingQty = typeof existing === 'object' ? existing.qty : (Number(existing) || 0)
+      return {
+        ...prev,
+        [key]: {
+          id,
+          qty: existingQty + qty,
+          selectedSize: size,
+          selectedColor: color,
+        }
+      }
+    })
   }
 
-  function removeItem(id) {
+  function removeItem(key) {
     setItems((prev) => {
       const next = { ...prev }
-      delete next[id]
+      delete next[key]
       return next
     })
   }
 
-  function setQty(id, qty) {
-    if (qty < 1) return removeItem(id)
-    setItems((prev) => ({ ...prev, [id]: qty }))
+  function setQty(key, qty) {
+    if (qty < 1) return removeItem(key)
+    setItems((prev) => {
+      const item = prev[key]
+      if (!item) return prev
+      const isObj = typeof item === 'object'
+      return {
+        ...prev,
+        [key]: isObj ? { ...item, qty } : qty
+      }
+    })
   }
 
   function clearCart() {
@@ -71,9 +95,19 @@ export function CartProvider({ children }) {
   }
 
   const cartList = Object.entries(items)
-    .map(([id, qty]) => {
+    .map(([key, itemData]) => {
+      const isObj = typeof itemData === 'object' && itemData !== null
+      const id = isObj ? itemData.id : key.split('__')[0]
+      const qty = isObj ? itemData.qty : Number(itemData)
+      const selectedSize = isObj 
+        ? itemData.selectedSize 
+        : (key.includes('__size_') ? key.split('__size_')[1]?.split('__')[0] : '')
+      const selectedColor = isObj 
+        ? itemData.selectedColor 
+        : (key.includes('__color_') ? key.split('__color_')[1]?.split('__')[0] : '')
+
       const product = getById(id)
-      return product ? { ...product, qty } : null
+      return product ? { ...product, cartKey: key, qty, selectedSize, selectedColor } : null
     })
     .filter(Boolean)
 

@@ -1,4 +1,4 @@
-﻿import ProductThumb from './ProductThumb'
+import ProductThumb from './ProductThumb'
 import { useToast } from '../context/ToastContext'
 import { Copy } from 'lucide-react'
 
@@ -25,7 +25,11 @@ export default function OrderSummaryCard({ order }) {
             </div>
             <div className="flex-1 min-w-0 text-sm">
               <div className="font-semibold truncate">{i.name}</div>
-              <div className="text-slate-500 text-xs">Qty {i.qty}</div>
+              <div className="text-slate-500 text-xs mt-0.5">
+                Qty {i.qty}
+                {i.size && ` • Size: ${i.size}`}
+                {i.color && ` • Warna: ${i.color}`}
+              </div>
             </div>
             <span className="font-mono text-sm font-semibold">{fmt(i.price * i.qty)}</span>
           </div>

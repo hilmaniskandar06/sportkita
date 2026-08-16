@@ -1,4 +1,4 @@
-﻿import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, Store, ShoppingBag, Heart, User as UserIcon } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -18,6 +18,16 @@ export default function BottomNav({ onOpenCart }) {
     return isActive ? `${base} text-lime-600` : `${base} text-slate-500 hover:text-slate-700`
   }
 
+  function handleKatalog() {
+    if (location.pathname === '/') {
+      const el = document.getElementById('katalog')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+      else window.scrollTo({ top: 450, behavior: 'smooth' })
+    } else {
+      navigate('/#katalog')
+    }
+  }
+
   function handleWishlist() {
     if (!user) {
       addToast('Silakan login terlebih dahulu', 'error')
@@ -34,16 +44,16 @@ export default function BottomNav({ onOpenCart }) {
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
       <ul className="grid grid-cols-5 items-end h-16 relative">
         <li className="h-full col-span-1">
-          <button type="button" onClick={() => navigate('/')} className={navItemClass(location.pathname === '/')}>
+          <button type="button" onClick={() => { navigate('/'); window.scrollTo({ top: 0, behavior: 'smooth' }) }} className={navItemClass(location.pathname === '/' && !location.hash)}>
             <Home size={20} strokeWidth={location.pathname === '/' ? 2.6 : 2} />
             <span>Beranda</span>
           </button>
         </li>
 
         <li className="h-full col-span-1">
-          <button type="button" onClick={() => navigate('/toko')} className={navItemClass(location.pathname === '/toko')}>
-            <Store size={20} strokeWidth={location.pathname === '/toko' ? 2.6 : 2} />
-            <span>Toko</span>
+          <button type="button" onClick={handleKatalog} className={navItemClass(location.hash === '#katalog')}>
+            <Store size={20} strokeWidth={location.hash === '#katalog' ? 2.6 : 2} />
+            <span>Katalog</span>
           </button>
         </li>
 

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { Printer, ChevronLeft } from 'lucide-react'
 import { useSiteContent } from '../context/SiteContentContext'
@@ -129,7 +129,12 @@ export default function Invoice() {
                 <tr key={item.id || idx} className="border-b border-gray-100">
                   <td className="py-4 px-2">
                     <div className="font-semibold text-gray-800">{item.name}</div>
-                    {item.weight && <div className="text-xs text-gray-500">{item.weight}</div>}
+                    {(item.size || item.color) && (
+                      <div className="text-xs text-gray-600 font-medium mt-0.5">
+                        {item.size && `Size: ${item.size}`}{item.size && item.color && ' • '}{item.color && `Warna: ${item.color}`}
+                      </div>
+                    )}
+                    {item.weight && <div className="text-xs text-gray-400">{item.weight}</div>}
                   </td>
                   <td className="py-4 px-2 text-center text-gray-600">{formatRp(item.price)}</td>
                   <td className="py-4 px-2 text-center text-gray-800 font-medium">{item.qty}</td>

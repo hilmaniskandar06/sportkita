@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { Minus, Plus, ShoppingBag } from 'lucide-react'
 import ProductThumb from '../components/ProductThumb'
 import { useCart } from '../context/CartContext'
@@ -28,19 +28,38 @@ export default function CartPage() {
       <div className="grid lg:grid-cols-[1fr_320px] gap-10">
         <div className="flex flex-col divide-y divide-gray-200 border-t border-b border-gray-200">
           {cartList.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 py-5">
+            <div key={item.cartKey || item.id} className="flex items-center gap-4 py-5">
               <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                <ProductThumb product={item} size={42} />
+                <ProductThumb product={item} size={50} />
               </div>
               <div className="flex-1 min-w-0">
-                <Link to={`/produk/${item.id}`} className="font-semibold text-sm hover:text-lime-600">{item.name}</Link>
-                <div className="text-xs text-slate-500">{item.category}</div>
-                <button onClick={() => removeItem(item.id)} className="text-xs text-rose-500 hover:underline mt-1">Hapus</button>
+                <Link to={`/produk/${item.id}`} className="font-bold text-sm hover:text-lime-600">{item.name}</Link>
+                <div className="text-xs text-slate-500 mb-1">{item.category}</div>
+                
+                {/* Size & Color Info */}
+                {(item.selectedSize || item.selectedColor) && (
+                  <div className="flex flex-wrap gap-1.5 mb-1.5">
+                    {item.selectedSize && (
+                      <span className="text-xs bg-gray-100 text-slate-800 font-bold px-2 py-0.5 rounded">
+                        Size {item.selectedSize}
+                      </span>
+                    )}
+                    {item.selectedColor && (
+                      <span className="text-xs bg-gray-100 text-slate-800 font-bold px-2 py-0.5 rounded">
+                        Warna: {item.selectedColor}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <button onClick={() => removeItem(item.cartKey || item.id)} className="text-xs text-rose-500 font-semibold hover:underline">
+                  Hapus
+                </button>
               </div>
               <div className="flex items-center border border-gray-200 rounded-full">
-                <button onClick={() => setQty(item.id, item.qty - 1)} className="w-8 h-8 flex items-center justify-center" aria-label="Kurangi"><Minus size={13} /></button>
-                <span className="w-8 text-center text-sm font-mono">{item.qty}</span>
-                <button onClick={() => setQty(item.id, item.qty + 1)} className="w-8 h-8 flex items-center justify-center" aria-label="Tambah"><Plus size={13} /></button>
+                <button onClick={() => setQty(item.cartKey || item.id, item.qty - 1)} className="w-8 h-8 flex items-center justify-center" aria-label="Kurangi"><Minus size={13} /></button>
+                <span className="w-8 text-center text-sm font-mono font-bold">{item.qty}</span>
+                <button onClick={() => setQty(item.cartKey || item.id, item.qty + 1)} className="w-8 h-8 flex items-center justify-center" aria-label="Tambah"><Plus size={13} /></button>
               </div>
               <span className="font-mono font-bold w-24 text-right">{fmt(item.price * item.qty)}</span>
             </div>

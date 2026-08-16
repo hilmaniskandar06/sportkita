@@ -75,7 +75,7 @@ export default function AdminShell({ title, actions, children }) {
             <span className="text-lime-400 font-medium text-sm ml-1">Admin</span>
           </Link>
           <div className="flex items-center gap-4">
-            <Link to="/toko" target="_blank" className="text-sm flex items-center gap-1.5 text-gray-100 hover:text-lime-400 transition-colors">
+            <Link to="/" target="_blank" className="text-sm flex items-center gap-1.5 text-gray-100 hover:text-lime-400 transition-colors">
               <Store size={15} /> Lihat Toko
             </Link>
             <button onClick={handleLogout} className="text-sm flex items-center gap-1.5 text-gray-100 hover:text-lime-400 transition-colors">
