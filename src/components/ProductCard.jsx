@@ -9,7 +9,9 @@ import { parseImage } from '../utils/image'
 
 const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
-export default function ProductCard({ product }) {
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400'
+
+export default function ProductCard({ product, variantColor = null, variantImage = null }) {
   const { toggle, isWishlisted } = useWishlist()
   const { addItem } = useCart()
   const { addToast } = useToast()
@@ -20,13 +22,22 @@ export default function ProductCard({ product }) {
     ? Math.round(100 - (product.price / product.oldPrice) * 100)
     : null
 
+  const imgUrl =
+    variantImage?.url ||
+    parseImage(product?.images?.[0] || product?.image).url ||
+    FALLBACK_IMG
+
+  const linkTo = variantColor
+    ? `/produk/${product.id}?color=${encodeURIComponent(variantColor)}`
+    : `/produk/${product.id}`
+
   function handleAdd(e) {
     e.preventDefault()
     e.stopPropagation()
     if (!product.inStock) return
     if (!user) return addToast('Silakan login terlebih dahulu', 'error')
-    addItem(product.id, 1)
-    addToast(`${product.name} ditambahkan ke keranjang`)
+    addItem(product.id, 1, { selectedColor: variantColor || '' })
+    addToast(`${product.name}${variantColor ? ` (${variantColor})` : ''} ditambahkan ke keranjang`)
   }
 
   function handleWishlist(e) {
@@ -39,7 +50,7 @@ export default function ProductCard({ product }) {
 
   return (
     <Link
-      to={`/produk/${product.id}`}
+      to={linkTo}
       className="group flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-lime-500 transition-colors"
     >
       <div className="relative h-32 sm:h-40 flex items-center justify-center bg-gray-100">
@@ -73,7 +84,7 @@ export default function ProductCard({ product }) {
           <Heart size={15} className={wishlisted ? 'fill-rose-500 text-rose-500' : 'text-slate-600'} />
         </button>
         <img 
-          src={parseImage(product?.images?.[0] || product?.image).url || 'https://images.unsplash.com/photo-1548852336-d748f522b10a?auto=format&fit=crop&q=80&w=400'} 
+          src={imgUrl} 
           alt={product.name} 
           className="w-full h-full object-cover"
         />

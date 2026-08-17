@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { X, Filter as FilterIcon } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
+import { flattenVariants } from '../utils/productVariants'
 import { useProducts } from '../context/ProductsContext'
 import { useCategories } from '../context/CategoriesContext'
 
@@ -232,7 +233,7 @@ export default function Shop() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                {results.map((p) => <ProductCard key={p.id} product={p} />)}
+                {flattenVariants(results).map((v) => <ProductCard key={v.key} product={v.product} variantColor={v.color} variantImage={v.image} />)}
               </div>
             )}
           </div>

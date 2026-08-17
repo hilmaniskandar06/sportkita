@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronDown, X, SlidersHorizontal, Check, Search, RotateCcw } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
+import { flattenVariants } from '../utils/productVariants'
 import { useProducts } from '../context/ProductsContext'
 import { useCategories } from '../context/CategoriesContext'
 import { useBrands } from '../context/BrandsContext'
@@ -731,8 +732,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {results.map((p) => (
-                <ProductCard key={p.id} product={p} />
+              {flattenVariants(results).map((v) => (
+                <ProductCard key={v.key} product={v.product} variantColor={v.color} variantImage={v.image} />
               ))}
             </div>
           )}

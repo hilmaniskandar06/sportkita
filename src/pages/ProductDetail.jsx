@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
-import { useParams, Link, Navigate } from 'react-router-dom'
-import { Minus, Plus, Heart, Truck, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { useParams, Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Minus, Plus, Heart, Truck, ShieldCheck, ChevronLeft, ChevronRight, Zap } from 'lucide-react'
 import ProductThumb from '../components/ProductThumb'
 import ProductCard from '../components/ProductCard'
+import { flattenVariants } from '../utils/productVariants'
 import { useProducts } from '../context/ProductsContext'
 import { useColors } from '../context/ColorsContext'
 import { useCart } from '../context/CartContext'
@@ -16,6 +17,8 @@ const fmt = (n) => 'Rp' + n.toLocaleString('id-ID')
 
 export default function ProductDetail() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const paramColor = (searchParams.get('color') || '').trim()
   const { products, getById, getRelated, loading } = useProducts()
   const product = getById(id)
   const [qty, setQty] = useState(1)
@@ -23,14 +26,30 @@ export default function ProductDetail() {
   const [imgIdx, setImgIdx] = useState(0)
   const sizeOptions = product?.size ? product.size.split(',').map((s) => s.trim()).filter(Boolean) : []
   const [selectedSize, setSelectedSize] = useState(sizeOptions[0] || '')
-  
+
+  const [selectedColor, setSelectedColor] = useState('')
+
   const colorOptions = product?.colors ? product.colors.split(',').map((c) => c.trim()).filter(Boolean) : []
-  const [selectedColor, setSelectedColor] = useState(colorOptions[0] || '')
+
+  const rawImages = product?.images?.length > 0 ? product.images : (product?.image ? [product.image] : [])
+  const images = rawImages.map(parseImage)
+
+  // Terapkan warna dari query ?color= begitu produk tersedia
+  useEffect(() => {
+    if (!product || !paramColor) return
+    const match = colorOptions.find((c) => c.toLowerCase() === paramColor.toLowerCase())
+    if (!match) return
+    setSelectedColor(match)
+    const idx = images.findIndex((img) => img.color && img.color.toLowerCase() === paramColor.toLowerCase())
+    if (idx !== -1) setImgIdx(idx)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, paramColor])
 
   const { addItem } = useCart()
   const { toggle, isWishlisted } = useWishlist()
   const { addToast } = useToast()
   const { user } = useAuth()
+  const navigate = useNavigate()
 
   const { colors } = useColors()
 
@@ -54,9 +73,12 @@ export default function ProductDetail() {
     addToast(`${qty}x ${product.name} ${details ? `(${details})` : ''} ditambahkan ke keranjang`)
   }
 
-  // Handle images with colors
-  const rawImages = product.images?.length > 0 ? product.images : (product.image ? [product.image] : [])
-  const images = rawImages.map(parseImage)
+  function handleBuyNow(e) {
+    if (e && e.preventDefault) e.preventDefault()
+    if (!product.inStock) return
+    if (!user) return addToast('Silakan login terlebih dahulu', 'error')
+    navigate('/checkout', { state: { directItem: { ...product, qty, selectedSize, selectedColor } } })
+  }
 
   const nextImg = () => setImgIdx((i) => (i + 1) % images.length)
   const prevImg = () => setImgIdx((i) => (i - 1 + images.length) % images.length)
@@ -263,13 +285,21 @@ export default function ProductDetail() {
             </button>
           </div>
 
-          <div className="mt-4">
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <button
               onClick={handleAdd}
               disabled={!product.inStock}
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-md text-sm md:text-base"
+              className="flex-1 flex items-center justify-center gap-2 bg-white border-2 border-slate-900 text-slate-900 hover:bg-gray-100 font-bold py-3.5 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
             >
-              {product.inStock ? 'Tambah ke Keranjang' : 'Stok Habis'}
+              <Plus size={16} /> Tambah ke Keranjang
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={!product.inStock}
+              className="flex-1 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-full transition-colors disabled:opacity-30 disabled:cursor-not-allowed shadow-md text-sm"
+            >
+              <Zap size={16} className="fill-current text-lime-400" />
+              {product.inStock ? 'Beli Sekarang' : 'Stok Habis'}
             </button>
           </div>
 
@@ -307,7 +337,7 @@ export default function ProductDetail() {
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {featured.map((p) => <ProductCard key={p.id} product={p} />)}
+            {flattenVariants(featured).map((v) => <ProductCard key={v.key} product={v.product} variantColor={v.color} variantImage={v.image} />)}
           </div>
         </div>
       )}
